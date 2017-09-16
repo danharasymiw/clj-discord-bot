@@ -31,13 +31,13 @@
       (Thread/sleep (* (+ (rand-int 5) 1) 60 1000))
       (discord/answer-command data message (img-search "quaggan")))
 
-;(defn quaggan-joe [type data]
-;      (let [message (get data "content")
-;            mentions (get data "mentions")
-;            mention-all (get data "mention_everyone")]
-;
-;           (if (or mention-all (.contains message quaggan-token))
-;             (quaggan-answer data message))))
+(defn quaggan-joe [type data]
+      (let [message (get data "content")
+            mentions (get data "mentions")
+            mention-all (get data "mention_everyone")]
+
+           (if (or mention-all (.contains message quaggan-token))
+             (quaggan-answer data message))))
 
 (defn gandhi-spellcheck [type data]
       (let [message (get data "content")]
@@ -48,6 +48,7 @@
       (let [message (get data "content")]
            (print "helpin")
            (if (.equals "!help" message)
+             ; TODO there has got to be a far more elegant way to do this
              (discord/answer-command data message
                                      (str "Commands \n"
                                           (:doc (meta #'d20)) "\n"
