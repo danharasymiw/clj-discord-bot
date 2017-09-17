@@ -17,6 +17,7 @@
       (let [result (http-client/get (generate-img-search-url query) {:as :json})]
            (get (nth (get-in result [:body :items]) 0) :link)))
 
+; TODO get this to work with multiple words in a query
 (defn find-img
       "!img <your_query> - Finds a random image of <your_query>"
       [type data]
@@ -61,7 +62,7 @@
 
 (defn -main [& args]
   (discord/connect discord-token
-                   {"MESSAGE_CREATE" [d20 find-img gandhi-spellcheck help]
+                   {"MESSAGE_CREATE" [d20 find-img quaggan-joe gandhi-spellcheck help]
                     "MESSAGE_UPDATE" [d20]
                     ; "ALL_OTHER" [log-event]
                     }
