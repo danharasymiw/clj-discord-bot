@@ -45,16 +45,20 @@
            (if (re-find #"(?i)ghandi" message)
              (discord/answer-command data message "Gandhi  (╯°□°）╯︵ ┻━┻"))))
 
+(defn links-mentioned [type data]
+      (let [message (get data "content")]
+           (if (re-find #"(?i)link" message)
+             (discord/answer-command data message (img-search "lynx")))))
+
 (defn help [type data]
       (let [message (get data "content")]
            (print "helpin")
            (if (.equals "!help" message)
-             ; TODO there has got to be a far more elegant way to do this
              (discord/answer-command data message
-                                     (str "Commands \n"
-                                          (:doc (meta #'d20)) "\n"
-                                          (:doc (meta #'find-img)) "\n"
-                                          (:doc (meta #'help)))))))
+                                     (str "Commands" (apply str
+                                          (map #(str "\n" (:doc (meta %))) [#'find-img
+                                                                            #'d20
+                                                                            #'help])))))))
 
 
 (defn log-event [type data] 
@@ -62,8 +66,13 @@
 
 (defn -main [& args]
   (discord/connect discord-token
-                   {"MESSAGE_CREATE" [d20 find-img quaggan-joe gandhi-spellcheck help]
-                    "MESSAGE_UPDATE" [d20]
+                   {"MESSAGE_CREATE" [d20
+                                      find-img
+                                      quaggan-joe
+                                      gandhi-spellcheck
+                                      links-mentioned
+                                      help]
+                    "MESSAGE_UPDATE" [quaggan-joe]
                     ; "ALL_OTHER" [log-event]
                     }
                    true))
