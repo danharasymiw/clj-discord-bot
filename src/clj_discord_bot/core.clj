@@ -7,27 +7,29 @@
 (defonce google-token (.trim (slurp "google_token.txt")))
 (defonce quaggan-token (.trim (slurp "quaggan_joe.txt")))
 
-(defn generate-img-search-url [query] (str "https://www.googleapis.com/customsearch/v1?q=" query "&cx=007505347843268886703%3Asukibcfg6xq&num=1&searchType=image&start=" (+ (rand-int 100) 1)  "&key=" google-token))
+(defn img-search-url [] "https://www.googleapis.com/customsearch/v1?&cx=007505347843268886703%3Asukibcfg6xq")
+
 
 (defn d20
       "!d20 - Picks a random number from 1-20"[type data]
       (discord/answer-command data "!d20" (str "You rolled: " (+ (rand-int 100) 1))))
 
 (defn img-search [query]
-      (let [result (http-client/get (generate-img-search-url query) {:as :json})]
+      (let [result (http-client/get (img-search-url) {:query-params {"q" query
+                                                                     "num" 1
+                                                                     "searchType" "image"
+                                                                     "start" (+ (rand-int 100) 1)
+                                                                     "key" google-token},
+                                                      :as :json, :debug true})]
            (get (nth (get-in result [:body :items]) 0) :link)))
 
-; TODO get this to work with multiple words in a query
 (defn find-img
       "!img <your_query> - Finds a random image of <your_query>"
       [type data]
 
       (let [message (get data "content")]
-           (if (.startsWith message "!img")
-             (let [split-string (clojure.string/split message #" ")]
-                  (if (> (count split-string) 1)
-                    (discord/answer-command data message (img-search (nth split-string 1))))))))
-
+           (if (.startsWith message "!img ")
+             (discord/answer-command data message (img-search (subs message (count "!img ")))))))
 (defn quaggan-answer [data message]
       (Thread/sleep (* (+ (rand-int 5) 1) 60 1000))
       (discord/answer-command data message (img-search "quaggan")))
@@ -36,9 +38,12 @@
       (let [message (get data "content")
             mentions (get data "mentions")
             mention-all (get data "mention_everyone")]
+           (println "THIS IS A TEST")
+           (println message)
+           (println quaggan-token)
 
-           (if (or mention-all (.contains message quaggan-token))
-             (quaggan-answer data message))))
+           (if (.contains message quaggan-token)
+             "test")))
 
 (defn gandhi-spellcheck [type data]
       (let [message (get data "content")]
@@ -72,7 +77,6 @@
                                       gandhi-spellcheck
                                       links-mentioned
                                       help]
-                    "MESSAGE_UPDATE" [quaggan-joe]
                     ; "ALL_OTHER" [log-event]
                     }
                    true))
