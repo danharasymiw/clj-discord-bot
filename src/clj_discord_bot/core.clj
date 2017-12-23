@@ -12,7 +12,7 @@
 
 (defn d20
       "!d20 - Picks a random number from 1-20"[type data]
-      (discord/answer-command data "!d20" (str "You rolled: " (+ (rand-int 100) 1))))
+      (discord/answer-command data "!d20" (str "You rolled: " (inc (rand-int 20)))))
 
 (defn img-search [query]
       (let [result (http-client/get (img-search-url) {:query-params {"q" query
@@ -70,15 +70,14 @@
   (println "\nReceived: " type " -> " data))
 
 (defn -main [& args]
-  (discord/connect discord-token
-                   {"MESSAGE_CREATE" [d20
-                                      find-img
-                                      quaggan-joe
-                                      gandhi-spellcheck
-                                      links-mentioned
-                                      help]
+  (discord/connect {:token discord-token
+                    :functions {"MESSAGE_CREATE" [d20
+                                                  find-img
+                                                  quaggan-joe
+                                                  gandhi-spellcheck
+                                                  links-mentioned
+                                                  help]}
                     ; "ALL_OTHER" [log-event]
-                    }
-                   true))
+                    }))
 
 ;(discord/disconnect)

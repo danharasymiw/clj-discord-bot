@@ -1,0 +1,9 @@
+# workspace ignores
+.idea
+*.iml
+target/
+
+# bot specific ignores
+discord_token.txt
+google_token.txt
+quaggan_joe.txt
