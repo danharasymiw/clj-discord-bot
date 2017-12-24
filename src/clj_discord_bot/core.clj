@@ -10,7 +10,6 @@
 
 (defn img-search-url [] "https://www.googleapis.com/customsearch/v1?&cx=007505347843268886703%3Asukibcfg6xq")
 
-
 (defn d20
       "!d20 - Picks a random number from 1-20"[type data]
       (discord/answer-command data "!d20" (str "You rolled: " (inc (rand-int 20)))))

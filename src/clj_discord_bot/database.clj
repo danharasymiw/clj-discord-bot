@@ -20,8 +20,17 @@
                           "user_id INTEGER NOT NULL,"
                           "PRIMARY KEY (server_id, game_name))")))
 
-(init-db)
-(insert! db :games testdata)
+(defn reset-db []
+  (do
+    (drop-table-ddl "games")
+    (init-db)
+    (insert! db :games testdata)))
 
-(def output
-  (query db "select * from games"))
+; testing
+(defn query-db [sql]
+  (query db sql))
+
+(defn game-query [server_id, game_name]
+  (query db ["SELECT * FROM games WHERE server_id=? AND game_name LIKE ?"
+             server_id
+             (str "%" game_name "%")])) ; wildcards so name can be anywhere
