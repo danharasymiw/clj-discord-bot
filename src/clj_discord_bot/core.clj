@@ -69,6 +69,17 @@
 (defn command-delegator [type data]
   (println "stub"))
 
+(defn game_update [type data]
+  (let [server_id (get-in data ["guild_id"]) ; looks like guild_id is the server_id for some reason?
+        user_id (get-in data ["user" "id"])
+        game_name (get-in data ["game" "name"])]
+    (when (and (some? server_id)
+               (some? user_id)
+               (some? game_name))
+      (db/game-insertion (get-in data ["guild_id"])
+                         (get-in data ["user" "id"])
+                         (get-in data ["game" "name"])))))
+
 (defn log-event [type data] 
   (println "\nReceived: " type " -> " data))
 
@@ -80,5 +91,6 @@
                                                   gandhi-spellcheck
                                                   links-mentioned
                                                   help]
+                                "PRESENCE_UPDATE" [game_update]
                                 "ALL_OTHER" [log-event]}
                     }))
