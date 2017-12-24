@@ -18,3 +18,5 @@ lein uberjar
 java -jar target/clj-discord-bot-0.1.0-SNAPSHOT-standalone.jar
 
 switch to using https://github.com/LonoCloud/lein-voom/ for the library
+
+# TODO update this 
