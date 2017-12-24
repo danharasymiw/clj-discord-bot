@@ -65,6 +65,9 @@
                                                                             #'d20
                                                                             #'help])))))))
 
+; TODO replace existing logic
+(defn command-delegator [type data]
+  (println "stub"))
 
 (defn log-event [type data] 
   (println "\nReceived: " type " -> " data))
@@ -79,5 +82,3 @@
                                                   help]
                                 "ALL_OTHER" [log-event]}
                     }))
-
-;(discord/disconnect)
