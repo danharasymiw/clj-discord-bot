@@ -2,6 +2,8 @@
 .idea
 *.iml
 target/
+.lein-repl-history
+.nrepl-port
 
 # bot specific ignores
 discord_token.txt

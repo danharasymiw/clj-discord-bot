@@ -1,7 +1,8 @@
 (ns clj-discord-bot.core
   (:gen-class)
   (:require [clj-discord.core :as discord]
-            [clj-http.client :as http-client]))
+            [clj-http.client :as http-client]
+            [clj-discord-bot.database :as db]))
 
 (defonce discord-token (.trim (slurp "discord_token.txt")))
 (defonce google-token (.trim (slurp "google_token.txt")))
@@ -76,8 +77,8 @@
                                                   quaggan-joe
                                                   gandhi-spellcheck
                                                   links-mentioned
-                                                  help]}
-                    ; "ALL_OTHER" [log-event]
+                                                  help]
+                                "ALL_OTHER" [log-event]}
                     }))
 
 ;(discord/disconnect)
