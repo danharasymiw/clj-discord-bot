@@ -1,0 +1,12 @@
+# workspace ignores
+.idea
+*.iml
+target/
+.lein-repl-history
+.nrepl-port
+
+# bot specific ignores
+db/database.db
+discord_token.txt
+google_token.txt
+quaggan_joe.txt
