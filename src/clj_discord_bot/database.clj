@@ -4,8 +4,7 @@
 (def db
   {:classname   "org.sqlite.JDBC"
    :subprotocol "sqlite"
-   :subname     "db/database.db"
-   })
+   :subname     "db/database.db"})
 
 (defn init-db []
   (db-do-commands db (str "CREATE TABLE IF NOT EXISTS games ("
@@ -19,14 +18,15 @@
     (drop-table-ddl "games")
     (init-db)))
 
-(defn game-query [server_id, game_name]
+(defn game-query [server-id, game-name]
   (query db ["SELECT * FROM games WHERE server_id=? AND game_name LIKE ?"
-             server_id
-             (str "%" game_name "%")])) ; wildcards so name can be anywhere
+             server-id
+             (str "%" game-name "%")])) ; wildcards so name can be anywhere
 
-(defn game-insertion [server_id, user_id game_name]
+(defn game-insertion [server-id, user-id game-name]
   (try
-    (insert! db :games {:server_id server_id,
-                        :user_id user_id,
-                        :game_name game_name})
-    (catch Exception e))) ; i dont care
+    (insert! db :games {:server_id server-id,
+                        :user_id user-id,
+                        :game_name game-name})
+    (catch Exception e
+      (println (.getMessage e) e))))

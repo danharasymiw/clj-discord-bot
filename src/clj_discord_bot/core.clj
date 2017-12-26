@@ -4,10 +4,10 @@
             [clj-http.client :as http-client]
             [clj-discord-bot.database :as db]
             [clj-discord-bot.commands.evangelize :as evangelize]
+            [clj-discord-bot.commands.game_summon :as summon]
             [clj-discord-bot.commands.img-search :as img-search]
-            [clj-discord-bot.commands.roll :as roll]
             [clj-discord-bot.commands.misc :as misc]
-            [clj-discord-bot.commands.game_summon :as summon]))
+            [clj-discord-bot.commands.roll :as roll]))
 
 (defonce discord-token (.trim (slurp "discord_token.txt")))
 
@@ -20,45 +20,45 @@
                                                 #'roll/d20
                                                 #'summon/game-summon])))))
 
-(defn game_update [type data]
-  (let [server_id 0 ;server id is not returned in message data, so ignore for now ... (get-in data ["guild_id"])
-        user_id (get-in data ["user" "id"])
-        game_name (get-in data ["game" "name"])]
-    (when (and (some? server_id)
-               (some? user_id)
-               (some? game_name))
-      (db/game-insertion server_id
-                         user_id
-                         game_name))))
+(defn game-update [type data]
+  (let [server-id 0 ;server id is not returned in message data, so ignore for now ... (get-in data ["guild_id"])
+        user-id (get-in data ["user" "id"])
+        game-id (get-in data ["game" "name"])]
+    (when (and (some? server-id)
+               (some? user-id)
+               (some? game-id))
+      (db/game-insertion server-id
+                         user-id
+                         game-id))))
 
 (defn command-mux [type data]
   (let [message (get data "content")]
     (try
       (cond
         (.contains message "clojure")
-          (evangelize/get-propaganda type data)
+        (evangelize/get-propaganda type data)
         (.equals "!help" message)
-          (help type data)
+        (help type data)
         (.equals "!d20" message)
-          (roll/d20 type data)
+        (roll/d20 type data)
         (.startsWith message "!summon ")
-          (summon/game-summon type data)
+        (summon/game-summon type data)
         (.startsWith message "!img ")
-          (img-search/find-img type data)
+        (img-search/find-img type data)
         (re-find #"(?i)ghandi" message)
-          (misc/gandhi-spellcheck type data)
+        (misc/gandhi-spellcheck type data)
         (re-find #"(?i)link" message)
-          (misc/links-mentioned type data))
-      (catch Exception e)) ; i still dont care
-    ))
+        (misc/links-mentioned type data))
+      (catch Exception e
+        (println (.getMessage e) e)))
+))
 
-(defn log-event [type data] 
+(defn log-event [type data]
   (println "\nReceived: " type " -> " data))
 
 (defn -main [& args]
   (db/init-db)
   (discord/connect {:token discord-token
                     :functions {"MESSAGE_CREATE" [command-mux]
-                                "PRESENCE_UPDATE" [game_update]
-                                "ALL_OTHER" [log-event]}
-                    }))
+                                "PRESENCE_UPDATE" [game-update]
+                                "ALL_OTHER" [log-event]}}))

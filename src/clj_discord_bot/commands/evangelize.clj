@@ -10,11 +10,11 @@
 (defn get-propaganda [type data]
   (discord/answer-command data
                           (get data "content")
-                          (let [fn-name (rand-nth lib)]
-                            (str "I see you are talking about Clojure.  Clojure is a very " (rand-nth adjectives) " language!\n"
+                          (let [fn-name (rand-nth lib)
+                                adjective (rand-nth adjectives)]
+                            (str "I see you are talking about Clojure.  Clojure is a very " adjective " language!\n"
                                  "Did you know Clojure has a function called `" fn-name "`?\n"
                                  "```\n"
                                  (docstring fn-name) "\n"
                                  "```\n"
-                                 "http://clojuredocs.org/clojure.core/" fn-name
-                                 ))))
+                                 "http://clojuredocs.org/clojure.core/" fn-name))))

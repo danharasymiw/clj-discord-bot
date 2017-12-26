@@ -6,7 +6,6 @@
   (for [entry entries]
     (str "<@" (get entry :user_id) ">")))
 
-
 (defn game-summon
   "!summon <part of game name> - Summons everyone who has played that game in the past!"
   [type data]
@@ -16,7 +15,7 @@
         results (db/game-query 0 (subs message (count "!summon ")))
         ; will select the most popular game by default
         game-info (second (last (sort-by #(count (second %)) (group-by :game_name results))))
-        pings (clojure.string/join ", "(gen-pings game-info))]
+        pings (clojure.string/join " " (gen-pings game-info))]
     (discord/post-message (get data "channel_id")
                           (str "Summoning anyone who has played `" (get game-info :game_name) "` before...\n"
                                pings))))
