@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [clj-discord.core :as discord]
             [clj-http.client :as http-client]
+            [clj-discord-bot.common :as common]
             [clj-discord-bot.database :as db]
             [clj-discord-bot.commands.evangelize :as evangelize]
             [clj-discord-bot.commands.game_summon :as summon]
@@ -35,23 +36,18 @@
   (let [message (get data "content")]
     (try
       (cond
-        (.contains message "clojure")
-        (evangelize/get-propaganda type data)
-        (.equals "!help" message)
-        (help type data)
-        (.equals "!d20" message)
-        (roll/d20 type data)
-        (.startsWith message "!summon ")
-        (summon/game-summon type data)
-        (.startsWith message "!img ")
-        (img-search/find-img type data)
-        (re-find #"(?i)ghandi" message)
-        (misc/gandhi-spellcheck type data)
-        (re-find #"(?i)link" message)
-        (misc/links-mentioned type data))
+        (.contains message "clojure") (when (common/random-chance 10)
+                                        (evangelize/get-propaganda type data))
+        (.startsWith message "!gamelist") (summon/game-list type data)
+        (.startsWith message "!gameadd") (summon/game-add type data)
+        (.equals "!help" message) (help type data)
+        (.equals "!d20" message) (roll/d20 type data)
+        (.startsWith message "!summon ") (summon/game-summon type data)
+        (.startsWith message "!img ") (img-search/find-img type data)
+        (re-find #"(?i)ghandi" message) (misc/gandhi-spellcheck type data)
+        (re-find #"(?i)link" message) (misc/links-mentioned type data))
       (catch Exception e
-        (println (.getMessage e) e)))
-))
+        (println (.getMessage e) e)))))
 
 (defn log-event [type data]
   (println "\nReceived: " type " -> " data))
