@@ -1,14 +1,14 @@
 (ns clj-discord-bot.core
   (:gen-class)
   (:require [clj-discord.core :as discord]
-            [clj-http.client :as http-client]
             [clj-discord-bot.common :as common]
             [clj-discord-bot.database :as db]
             [clj-discord-bot.commands.evangelize :as evangelize]
             [clj-discord-bot.commands.game_summon :as summon]
             [clj-discord-bot.commands.img-search :as img-search]
             [clj-discord-bot.commands.misc :as misc]
-            [clj-discord-bot.commands.roll :as roll]))
+            [clj-discord-bot.commands.roll :as roll]
+            [clj-http.client :as http-client]))
 
 (defonce discord-token (.trim (slurp "discord_token.txt")))
 
@@ -36,8 +36,7 @@
   (let [message (get data "content")]
     (try
       (cond
-        (.contains message "clojure") (when (common/random-chance 10)
-                                        (evangelize/get-propaganda type data))
+        (.contains message "clojure") (evangelize/get-propaganda type data)
         (.startsWith message "!gamelist") (summon/game-list type data)
         (.startsWith message "!gameadd") (summon/game-add type data)
         (.equals "!help" message) (help type data)
