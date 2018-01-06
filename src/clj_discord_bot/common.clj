@@ -13,3 +13,18 @@
                                                 "key"        google-token},
                                  :as           :json, :debug true})]
     (get (nth (get-in result [:body :items]) 0) :link)))
+
+(defn random-chance [max-odds]
+  (if (= (inc (rand-int max-odds)) 1)
+    true
+    false))
+
+(defn back-tick-it [it]
+  (str "`" it "`"))
+
+(defn bongo []
+  (let [bank ["Bingo" "Bango" "Bongo" "Ba-Bingo" "Bam" "BongBingo" "Bang" "Bong" "Bing"]
+        amount-words (inc (rand-int 10))
+        words (take amount-words (repeatedly #(rand-nth bank)))
+        delim (rand-nth ["..." ","])]
+    (str (clojure.string/join delim words) "!")))
