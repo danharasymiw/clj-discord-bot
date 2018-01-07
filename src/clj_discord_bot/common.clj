@@ -24,7 +24,7 @@
 
 (defn bongo []
   (let [bank ["Bingo" "Bango" "Bongo" "Ba-Bingo" "Bam" "BongBingo" "Bang" "Bong" "Bing"]
-        amount-words (inc (rand-int 10))
+        amount-words (inc (rand-int 5))
         words (take amount-words (repeatedly #(rand-nth bank)))
-        delim (rand-nth ["..." ","])]
+        delim (rand-nth ["... " ", "])]
     (str (clojure.string/join delim words) "!")))

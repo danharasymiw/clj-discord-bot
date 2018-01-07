@@ -19,7 +19,8 @@
                                (apply str (map #(str "\n" (:doc (meta %)))
                                                [#'img-search/find-img
                                                 #'roll/d20
-                                                #'summon/game-summon])))))
+                                                #'summon/game-summon
+                                                #'summon/game-add])))))
 
 (defn game-update [type data]
   (let [server-id 0 ;server id is not returned in message data, so ignore for now ... (get-in data ["guild_id"])

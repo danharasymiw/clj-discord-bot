@@ -41,8 +41,9 @@
   [type data]
   (let [id (get (first (get data "mentions")) "id")
         message (get data "content")
-        game-name (nth (clojure.string/split message #" ") 2)]
+        game-name (->> (clojure.string/split message #" ")
+                       (nnext)
+                       (clojure.string/join #" "))]
     (db/game-insertion 0 id game-name)
     (discord/post-message (get data "channel_id")
                           (common/bongo))))
-
