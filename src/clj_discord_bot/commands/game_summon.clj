@@ -26,24 +26,34 @@
                                  (common/bongo))))))
 
 (defn game-list
-  "!gamelist <@ mention user> - Prints all games associated with that user"
+  "!gamelist <@ mention user(s)> - Prints all games associated with that user, or all the games those users have in common "
   [type data]
-  (let [id (get (first (get data "mentions")) "id")
-        results (db/get-users-games id)
-        games (clojure.string/join "\n" (map common/back-tick-it (map :game_name results)))]
-    (println games)
+  (let [mention-ids (map #(get % "id") (get data "mentions"))
+        results (for [id mention-ids]
+                     (into #{} (map :game_name (db/get-users-games id))))
+        common-games (apply clojure.set/intersection results)
+        games-str (clojure.string/join "\n" (map common/back-tick-it common-games))]
     (discord/post-message (get data "channel_id")
-                          (str "<@" id "> has played the following games / streamed with the following titles in the past:\n"
-                               games))))
+                          (str
+                            (apply str (for [id mention-ids]
+                                    (str "<@" id "> ")))
+                            (if (> (count mention-ids) 1)
+                              "have both "
+                              "has ")
+                               "played the following games / streamed with the following titles in the past:\n"
+                               games-str))
+
+       ))
 
 (defn game-add
-  "!gameadd <@ mention user> <game name> - Adds someones game entry because they dont want to enable game status"
+  "!gameadd <@ mention user(s)> <game name> - Adds someones game entry because they dont want to enable game status"
   [type data]
-  (let [id (get (first (get data "mentions")) "id")
+  (let [mention-ids (map #(get % "id") (get data "mentions"))
         message (get data "content")
         game-name (->> (clojure.string/split message #" ")
-                       (nnext)
+                       (drop (inc (count mention-ids)))
                        (clojure.string/join #" "))]
-    (db/game-insertion 0 id game-name)
+       (doseq [id mention-ids]
+            (db/game-insertion 0 id game-name))
     (discord/post-message (get data "channel_id")
                           (common/bongo))))
