@@ -6,8 +6,8 @@
 (def sb (sandbox secure-tester))
 
 (defn result->string [object]
-  (with-out-str
-    (clojure.pprint/pprint object)))
+  (str "=> "
+       (with-out-str (clojure.pprint/pprint object))))
 
 (defn run-code
   "```clj <your clojure code> ``` - Runs your Clojure Code"
@@ -18,11 +18,12 @@
                    (clojure.string/replace #"```" ""))
           writer (java.io.StringWriter.)
           result (sb (read-string code))]
-      (sb (read-string code) {#'*out* writer})
       (discord/post-message (get data "channel_id")
                             (if (nil? result)
-                              (str "=> " (result->string writer))
-                              (str "=> " (result->string result)))))
+                              (do
+                                (sb (read-string code) {#'*out* writer})
+                                (result->string writer))
+                              (result->string result))))
     (catch Exception e
       (discord/post-message (get data "channel_id")
                             (.getMessage e)))))
