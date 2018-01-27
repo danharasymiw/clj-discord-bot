@@ -8,6 +8,7 @@
             [clj-discord-bot.commands.img-search :as img-search]
             [clj-discord-bot.commands.misc :as misc]
             [clj-discord-bot.commands.roll :as roll]
+            [clj-discord-bot.commands.sandbox :as sandbox]
             [clj-http.client :as http-client]))
 
 (defonce discord-token (.trim (slurp "discord_token.txt")))
@@ -39,6 +40,8 @@
     (try
       (cond
         (.contains message "clojure") (evangelize/get-propaganda type data)
+        (.startsWith message "```clj") (sandbox/run-code type data)
+        (.startsWith message "```clojure") (sandbox/run-code type data)
         (.startsWith message "!gamelist") (summon/game-list type data)
         (.startsWith message "!gameadd") (summon/game-add type data)
         (.equals "!help" message) (help type data)
