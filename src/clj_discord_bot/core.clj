@@ -39,9 +39,9 @@
   (let [message (get data "content")]
     (try
       (cond
-        (.contains message "clojure") (evangelize/get-propaganda type data)
         (.startsWith message "```clj") (sandbox/run-code type data)
         (.startsWith message "```clojure") (sandbox/run-code type data)
+        (.contains message "clojure") (evangelize/get-propaganda type data)
         (.startsWith message "!gamelist") (summon/game-list type data)
         (.startsWith message "!gameadd") (summon/game-add type data)
         (.equals "!help" message) (help type data)
