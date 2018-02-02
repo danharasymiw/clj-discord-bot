@@ -22,7 +22,8 @@
                                                 #'roll/d20
                                                 #'summon/game-summon
                                                 #'summon/game-add
-                                                #'summon/game-list])))))
+                                                #'summon/game-list
+                                                #'summon/add-steam-games])))))
 
 (defn game-update [type data]
   (let [server-id 0 ;server id is not returned in message data, so ignore for now ... (get-in data ["guild_id"])
@@ -39,6 +40,7 @@
   (let [message (get data "content")]
     (try
       (cond
+        (.startsWith message "!steamadd") (summon/add-steam-games type data)
         (.startsWith message "```clj") (sandbox/run-code type data)
         (.startsWith message "```clojure") (sandbox/run-code type data)
         (.contains message "clojure") (evangelize/get-propaganda type data)
@@ -49,7 +51,8 @@
         (.startsWith message "!summon ") (summon/game-summon type data)
         (.startsWith message "!img ") (img-search/find-img type data)
         (re-find #"(?i)ghandi" message) (misc/gandhi-spellcheck type data)
-        (re-find #"(?i)link" message) (misc/links-mentioned type data))
+        (re-find #"(?i)link" message) (misc/links-mentioned type data)
+        )
       (catch Exception e
         (println (.getMessage e) e)))))
 

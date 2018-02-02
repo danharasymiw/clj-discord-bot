@@ -28,3 +28,8 @@
         words (take amount-words (repeatedly #(rand-nth bank)))
         delim (rand-nth ["... " ", "])]
     (str (clojure.string/join delim words) "!")))
+
+(defn remove-command-from-message [message]
+      (->> (clojure.string/split message #" ")
+           (next)
+           (clojure.string/join #" ")))

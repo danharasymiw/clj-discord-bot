@@ -1,7 +1,10 @@
 (ns clj-discord-bot.commands.game_summon
   (:require [clj-discord-bot.database :as db]
             [clj-discord.core :as discord]
-            [clj-discord-bot.common :as common]))
+            [clj-discord-bot.common :as common]
+            [clj-http.client :as http-client]))
+
+(defonce steam-token (slurp "steam_token.txt"))
 
 (defn gen-pings [entries]
   (for [entry entries]
@@ -28,11 +31,12 @@
 (defn game-list
   "!gamelist <@ mention user(s)> - Prints all games associated with that user, or all the games those users have in common "
   [type data]
-  (let [mention-ids (map #(get % "id") (get data "mentions"))
+  (let [channel_id (get data "channel_id")
+        mention-ids (map #(get % "id") (get data "mentions"))
         results (for [id mention-ids]
                      (into #{} (map :game_name (db/get-users-games id))))
         common-games (apply clojure.set/intersection results)
-        games-str (clojure.string/join "\n" (map common/back-tick-it common-games))]
+        backticked-games (map common/back-tick-it common-games)]
     (discord/post-message (get data "channel_id")
                           (str
                             (apply str (for [id mention-ids]
@@ -40,9 +44,12 @@
                             (if (> (count mention-ids) 1)
                               "have both "
                               "has ")
-                               "played the following games / streamed with the following titles in the past:\n"
-                               games-str))
-
+                               "played the following games / streamed with the following titles in the past:\n"))
+    (doseq [games (partition 10 backticked-games)]
+      (Thread/sleep 5000)
+      (println "Sending message!!!")
+      (discord/post-message channel_id
+                            (clojure.string/join "\n" games)))
        ))
 
 (defn game-add
@@ -57,3 +64,30 @@
             (db/game-insertion 0 id game-name))
     (discord/post-message (get data "channel_id")
                           (common/bongo))))
+
+(defn add-steam-games
+  "!steamadd <@ mention user> <link to steam profile> - Adds all of the games from someones steam library to that person"
+  [type data]
+  (let [mention-id (first (map #(get % "id") (get data "mentions")))
+        message (get data "content")
+        steam-url (-> (clojure.string/split message #" ")
+                      (last))
+        steam-name (-> (clojure.string/split message #"/")
+                       (last))
+        steam-id (-> (http-client/get "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001"
+                                  {:query-params {:key steam-token
+                                                  :vanityurl steam-name}
+                                   :as :json})
+                     :body :response :steamid)
+        games (-> (http-client/get "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
+                         {:query-params {:key steam-token
+                                         :steamid steam-id
+                                         :include_played_free_games 1
+                                         :include_appinfo 1} :as :json})
+                           :body :response :games)]
+    (doseq [game games]
+      (println (:name game))
+      (db/game-insertion 0 mention-id (:name game)))
+    (discord/post-message (get data "channel_id")
+                          (str (common/bongo) "\n"
+                               "Added " (count games) " games to user."))))
