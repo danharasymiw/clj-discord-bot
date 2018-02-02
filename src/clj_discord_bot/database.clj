@@ -41,7 +41,7 @@
                         :user_id user-id,
                         :game_name game-name})
     (catch Exception e
-      (println (.getMessage e) e))))
+      (println (.getMessage e)))))
 
 (defn game-deletion [server-id, user-id, game-name]
       (try
