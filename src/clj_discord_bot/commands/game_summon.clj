@@ -45,9 +45,9 @@
                               "have both "
                               "has ")
                                "played the following games / streamed with the following titles in the past:\n"))
-    (doseq [games (partition 10 backticked-games)]
+
+    (doseq [games (partition-all 10 backticked-games)]
       (Thread/sleep 1000)
-      (println "Sending message!!!")
       (discord/post-message channel_id
                             (clojure.string/join "\n" games)))
        ))
