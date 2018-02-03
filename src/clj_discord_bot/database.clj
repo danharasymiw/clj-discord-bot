@@ -45,7 +45,7 @@
 
 (defn game-deletion [server-id, user-id, game-name]
       (try
-        (delete! db :games ["user-id = ? AND game-name = ?" user-id game-name])
+        (delete! db :games ["user_id = ? AND game_name = ?" user-id game-name])
         (catch Exception e
           (println (.getMessage e) e))))
 

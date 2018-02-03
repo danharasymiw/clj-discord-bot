@@ -46,7 +46,7 @@
                               "has ")
                                "played the following games / streamed with the following titles in the past:\n"))
     (doseq [games (partition 10 backticked-games)]
-      (Thread/sleep 5000)
+      (Thread/sleep 1000)
       (println "Sending message!!!")
       (discord/post-message channel_id
                             (clojure.string/join "\n" games)))
@@ -65,8 +65,21 @@
     (discord/post-message (get data "channel_id")
                           (common/bongo))))
 
+(defn game-remove
+  "!gameremove <@ mention user(s) <game name> - Removes a game entry from someone"
+  [type data]
+  (let [mention-ids (map #(get % "id") (get data "mentions"))
+        message (get data "content")
+        game-name (->> (clojure.string/split message #" ")
+                       (drop (inc (count mention-ids)))
+                       (clojure.string/join #" "))]
+    (doseq [id mention-ids]
+      (db/game-deletion 0 id game-name))
+    (discord/post-message (get data "channel_id")
+                          (common/bongo))))
+
 (defn add-steam-games
-  "!steamadd <@ mention user> <link to steam profile> - Adds all of the games from someones steam library to that person"
+  "!steamadd <@ mention user> <steam community profile url> - Adds all of the games from someones steam library to that person"
   [type data]
   (let [mention-id (first (map #(get % "id") (get data "mentions")))
         message (get data "content")

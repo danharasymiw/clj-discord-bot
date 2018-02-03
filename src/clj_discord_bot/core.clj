@@ -22,6 +22,7 @@
                                                 #'roll/d20
                                                 #'summon/game-summon
                                                 #'summon/game-add
+                                                #'summon/game-remove
                                                 #'summon/game-list
                                                 #'summon/add-steam-games])))))
 
@@ -46,6 +47,7 @@
         (.contains message "clojure") (evangelize/get-propaganda type data)
         (.startsWith message "!gamelist") (summon/game-list type data)
         (.startsWith message "!gameadd") (summon/game-add type data)
+        (.startsWith message "!gameremove") (summon/game-remove type data)
         (.equals "!help" message) (help type data)
         (.equals "!d20" message) (roll/d20 type data)
         (.startsWith message "!summon ") (summon/game-summon type data)
