@@ -1,6 +1,7 @@
 (ns clj-discord-bot.core
   (:gen-class)
   (:require [clj-discord.core :as discord]
+            [clj-discord-bot.bot-interactions.bot-discussion :as bot-talk]
             [clj-discord-bot.common :as common]
             [clj-discord-bot.database :as db]
             [clj-discord-bot.commands.evangelize :as evangelize]
@@ -40,21 +41,30 @@
 (defn command-mux [type data]
   (let [message (get data "content")]
     (try
-      (cond
-        (.startsWith message "!steamadd") (summon/add-steam-games type data)
-        (.startsWith message "```clj") (sandbox/run-code type data)
-        (.startsWith message "```clojure") (sandbox/run-code type data)
-        (.contains message "clojure") (evangelize/get-propaganda type data)
-        (.startsWith message "!gamelist") (summon/game-list type data)
-        (.startsWith message "!gameadd") (summon/game-add type data)
-        (.startsWith message "!gameremove") (summon/game-remove type data)
-        (.equals "!help" message) (help type data)
-        (.equals "!d20" message) (roll/d20 type data)
-        (.startsWith message "!summon ") (summon/game-summon type data)
-        (.startsWith message "!img ") (img-search/find-img type data)
-        (re-find #"(?i)ghandi" message) (misc/gandhi-spellcheck type data)
-        (re-find #"(?i)link" message) (misc/links-mentioned type data)
-        )
+
+      (if (and (.startsWith message "(")
+               (.endsWith message ")"))
+        (let [command (->> message
+                           (next)
+                           (butlast)
+                           (apply str))
+              command-data (assoc data "content" command)]
+          (cond
+            (.startsWith command "steamadd") (summon/add-steam-games type data)
+            (.startsWith command "gamelist") (summon/game-list type data)
+            (.startsWith command "gameadd") (summon/game-add type data)
+            (.startsWith command "gameremove") (summon/game-remove type data)
+            (.equals "help" command) (help type data)
+            (.equals "d20" command) (roll/d20 type data)
+            (.startsWith command "summon ") (summon/game-summon type data)
+            (.startsWith command "img ") (img-search/find-img type data)))
+        (cond
+          (.startsWith message "```clj") (sandbox/run-code type data)
+          (.startsWith message "```clojure") (sandbox/run-code type data)
+          (.contains message "clojure") (evangelize/get-propaganda type data)
+          (re-find #"(?i)ghandi" message) (misc/gandhi-spellcheck type data)
+          (re-find #"(?i)link" message) (misc/links-mentioned type data)
+          (re-find #"(?i)rewriting it in Rust\?" message) (bot-talk/rewrite-it-in-rust-response type data)))
       (catch Exception e
         (println (.getMessage e) e)))))
 
@@ -66,4 +76,5 @@
   (discord/connect {:token discord-token
                     :functions {"MESSAGE_CREATE" [command-mux]
                                 "PRESENCE_UPDATE" [game-update]
-                                "ALL_OTHER" [log-event]}}))
+                                "ALL_OTHER" [log-event]}
+                    :rate-limit 1}))
