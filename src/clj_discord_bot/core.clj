@@ -50,14 +50,14 @@
                            (apply str))
               command-data (assoc data "content" command)]
           (cond
-            (.startsWith command "steamadd") (summon/add-steam-games type data)
-            (.startsWith command "gamelist") (summon/game-list type data)
-            (.startsWith command "gameadd") (summon/game-add type data)
-            (.startsWith command "gameremove") (summon/game-remove type data)
-            (.equals "help" command) (help type data)
-            (.equals "d20" command) (roll/d20 type data)
-            (.startsWith command "summon ") (summon/game-summon type data)
-            (.startsWith command "img ") (img-search/find-img type data)))
+            (.startsWith command "steamadd") (summon/add-steam-games type command-data)
+            (.startsWith command "gamelist") (summon/game-list type command-data)
+            (.startsWith command "gameadd") (summon/game-add type command-data)
+            (.startsWith command "gameremove") (summon/game-remove type command-data)
+            (.equals "help" command) (help type command-data)
+            (.equals "d20" command) (roll/d20 type command-data)
+            (.startsWith command "summon ") (summon/game-summon type command-data)
+            (.startsWith command "img ") (img-search/find-img type command-data)))
         (cond
           (.startsWith message "```clj") (sandbox/run-code type data)
           (.startsWith message "```clojure") (sandbox/run-code type data)
