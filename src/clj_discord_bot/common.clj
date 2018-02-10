@@ -30,8 +30,6 @@
     (str (clojure.string/join delim words) "!")))
 
 (defn remove-command-from-message [message]
-  (->> (drop 1 message)
-       (butlast)
-       (clojure.string/split message #" ")
+  (->> (clojure.string/split message #" ")
        (next)
        (clojure.string/join #" ")))
