@@ -7,7 +7,6 @@
             [clj-discord-bot.commands.evangelize :as evangelize]
             [clj-discord-bot.commands.game_summon :as summon]
             [clj-discord-bot.commands.img-search :as img-search]
-            [clj-discord-bot.commands.misc :as misc]
             [clj-discord-bot.commands.roll :as roll]
             [clj-discord-bot.commands.sandbox :as sandbox]
             [clj-http.client :as http-client]))
@@ -62,8 +61,6 @@
           (.startsWith message "```clj") (sandbox/run-code type data)
           (.startsWith message "```clojure") (sandbox/run-code type data)
           (.contains message "clojure") (evangelize/get-propaganda type data)
-          (re-find #"(?i)ghandi" message) (misc/gandhi-spellcheck type data)
-          (re-find #"(?i)link" message) (misc/links-mentioned type data)
           (re-find #"(?i)rewriting it in Rust\?" message) (bot-talk/rewrite-it-in-rust-response type data)))
       (catch Exception e
         (println (.getMessage e) e)))))
