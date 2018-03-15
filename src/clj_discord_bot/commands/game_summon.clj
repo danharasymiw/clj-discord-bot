@@ -8,7 +8,7 @@
 
 (defn gen-pings [entries]
   (for [entry entries]
-    (str "<@" (get entry :user_id) ">")))
+    (str (common/mention-user (get entry :user_id)))))
 
 (defn game-summon
   "(summon <part of game name>) - Summons everyone who has played that game in the past"
@@ -40,7 +40,7 @@
     (discord/post-message (get data "channel_id")
                           (str
                            (apply str (for [id mention-ids]
-                                        (str "<@" id "> ")))
+                                        (common/mention-user id)))
                            (if (> (count mention-ids) 1)
                              "have both "
                              "has ")

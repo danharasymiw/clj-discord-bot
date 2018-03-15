@@ -9,7 +9,11 @@
             [clj-discord-bot.commands.img-search :as img-search]
             [clj-discord-bot.commands.roll :as roll]
             [clj-discord-bot.commands.sandbox :as sandbox]
-            [clj-http.client :as http-client]))
+            [clj-discord-bot.commands.world-of-warcraft :as wow]
+            [clj-http.client :as http-client]
+            [clj-time [core :as t]]))
+
+(def last-time-guy-trolled (atom (t/now)))
 
 (defonce discord-token (.trim (slurp "discord_token.txt")))
 
@@ -66,7 +70,10 @@
         (println (.getMessage e) e)))))
 
 (defn log-event [type data]
-  (println "\nReceived: " type " -> " data))
+  (println "\nReceived: " type " -> " data)
+  (when (< 2 (t/in-minutes (t/interval @last-time-guy-trolled (t/now))))
+    (reset! last-time-guy-trolled (t/now))
+    (wow/troll-guy)))
 
 (defn -main [& args]
   (db/init-db)
