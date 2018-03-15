@@ -3,6 +3,7 @@
                  [clj-discord "0.1.0-SNAPSHOT"]
                  [clj-http "3.7.0"]
                  [clj-meme "0.1.0"]
+                 [clj-time "0.14.2"]
                  [clojail "1.0.6"]
                  [org.clojure/data.json "0.2.6"]
                  [cheshire "5.8.0"]

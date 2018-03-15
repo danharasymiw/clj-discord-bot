@@ -33,3 +33,6 @@
   (->> (clojure.string/split message #" ")
        (next)
        (clojure.string/join #" ")))
+
+(defn mention-user [id]
+  (str "<@" id "> "))
