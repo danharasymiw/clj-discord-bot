@@ -70,10 +70,13 @@
         (println (.getMessage e) e)))))
 
 (defn log-event [type data]
-  (println "\nReceived: " type " -> " data)
-  (when (< 2 (t/in-minutes (t/interval @last-time-guy-trolled (t/now))))
-    (reset! last-time-guy-trolled (t/now))
-    (wow/troll-guy)))
+  (try
+    (println "\nReceived: " type " -> " data)
+    (when (< 5 (t/in-seconds (t/interval @last-time-guy-trolled (t/now))))
+      (reset! last-time-guy-trolled (t/now))
+      (wow/troll-guy))
+    (catch Exception e
+      (println (.getMessage e) e))))
 
 (defn -main [& args]
   (db/init-db)

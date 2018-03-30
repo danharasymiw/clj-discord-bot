@@ -89,10 +89,14 @@
   (jdbc/drop-table-ddl "wow"))
 
 (defn rating-insertion [name realm bracket rating]
-  (jdbc/insert! db :wow {:name name
-                     :realm realm
-                     :bracket bracket
-                     :rating rating}))
+  (try
+    (jdbc/insert! db :wow {:name name
+                           :realm realm
+                           :bracket bracket
+                           :rating rating})
+    (catch Exception e
+      (println (.getMessage e) e)
+      (println name bracket rating realm))))
 
 (defn rating-update [name realm bracket rating]
   (jdbc/update! db :wow {:rating rating} ["name = ? AND realm = ? AND bracket = ?" name realm bracket]))

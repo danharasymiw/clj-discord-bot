@@ -14,7 +14,7 @@
 (def robot-stuff-channel-id 395989933539459074)
 
 
-(defn get-current-rating [name realm]
+(defn get-current-brackets [name realm]
   (let [brackets (-> (http-client/get (str "https://us.api.battle.net/wow/character/" realm "/" name
                                        "?fields=pvp&locale=en_US")
                                   {:query-params {:apikey wow-token}
@@ -35,14 +35,15 @@
 
 (defn troll-guy []
   (doseq [character guys-characters]
-    (doseq [bracket (get-current-rating (:name character) (:realm character))]
-      (let [old-rating (get-old-rating (:name character) (:realm character) (:bracket bracket))
+    (doseq [bracket (get-current-brackets (:name character) (:realm character))]
+      (let [bracket-name (:bracket bracket)
+            old-rating (get-old-rating (:name character) (:realm character) bracket-name)
             current-rating (:rating bracket)
             rating-diff (- current-rating old-rating)]
         (println "updating rating for " bracket " to " current-rating)
-        (db/rating-update (:name character) (:realm character) bracket current-rating)
+        (db/rating-update (:name character) (:realm character) bracket-name current-rating)
         (when (< rating-diff 0)
           (discord/post-message robot-stuff-channel-id
                                 (str (common/mention-user guys-id) "why did your rating for "
-                                     (:bracket bracket)" drop by " (Math/abs rating-diff) " down to " current-rating "?\n"
+                                     bracket-name " drop by " (Math/abs rating-diff) " down to " current-rating "?\n"
                                   (common/bongo))))))))
