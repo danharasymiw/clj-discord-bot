@@ -15,7 +15,7 @@
   [type data]
   (let [message (get data "content")
         ; server_id temporary disabled, not supported by API
-        results (db/game-query 0 (subs message (count "!summon ")))
+        results (db/game-query 0 (subs message (count "summon ")))
         ; will select the most popular game by default
         game-info (second (last (sort-by #(count (second %)) (group-by :game_name results))))
         pings (clojure.string/join " " (gen-pings game-info))
