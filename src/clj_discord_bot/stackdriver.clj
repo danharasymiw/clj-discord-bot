@@ -1,5 +1,5 @@
 (ns clj-discord-bot.stackdriver
-  (:import (com.google.cloud.logging LogEntry Severity Logging LoggingOptions Payload$StringPayload)
+  (:import (com.google.cloud.logging LogEntry Severity Logging LoggingOptions Payload$StringPayload Logging$WriteOption)
            (com.google.cloud MonitoredResource)
            (java.util Collections)))
 
@@ -23,7 +23,6 @@
       (with-open [^Logging logging (-> (LoggingOptions/getDefaultInstance)
                                        (.getService))]
         (-> logging
-            (.write nil (Collections/singleton entry))))
+            (.write (Collections/singleton entry) (into-array Logging$WriteOption '()))))
       (catch Exception e
-        ; (println e)
         (println data)))))

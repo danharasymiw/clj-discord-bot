@@ -49,13 +49,13 @@
                         :user_id user-id,
                         :game_name game-name})
     (catch Exception e
-      (stackdriver/log (.getMessage e) :error))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn game-deletion [server-id, user-id, game-name]
   (try
     (jdbc/delete! db :games ["user_id = ? AND game_name = ?" user-id game-name])
     (catch Exception e
-      (stackdriver/log (.getMessage e) :error))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn get-meme-image [meme-text]
   (let [img-blob (jdbc/query db ["SELECT image from memes where meme_text LIKE ?" meme-text])
@@ -71,13 +71,13 @@
                             :image (b/to-byte-array fis)})
         (.close fis))
       (catch Exception e
-        (stackdriver/log (.getMessage e) :error)))))
+        (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error)))))
 
 (defn meme-deletion [meme-text]
   (try
     (jdbc/delete! db :memes ["meme_text = ?" meme-text])
     (catch Exception e
-      (stackdriver/log (.getMessage e) :error))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn get-meme-list []
   (jdbc/query db ["SELECT meme_text from MEMES"]))
@@ -95,7 +95,7 @@
                            :bracket bracket
                            :rating rating})
     (catch Exception e
-      (stackdriver/log (.getMessage e) :error))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn rating-update [name realm bracket rating]
   (jdbc/update! db :wow {:rating rating} ["name = ? AND realm = ? AND bracket = ?" name realm bracket]))

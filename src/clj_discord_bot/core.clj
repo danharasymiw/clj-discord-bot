@@ -45,7 +45,6 @@
 (defn command-mux [type data]
   (let [message (get data "content")]
     (try
-
       (if (and (.startsWith message "(")
                (.endsWith message ")"))
         (let [command (->> message
@@ -53,6 +52,7 @@
                            (butlast)
                            (apply str))
               command-data (assoc data "content" command)]
+          (stackdriver/log (str "Attempting Command - " message) :error)
           (cond
             (.startsWith command "steamadd") (summon/add-steam-games type command-data)
             (.startsWith command "gamelist") (summon/game-list type command-data)
@@ -69,7 +69,7 @@
           (.contains message "clojure") (evangelize/get-propaganda type data)
           (re-find #"(?i)rewriting it in Rust\?" message) (bot-talk/rewrite-it-in-rust-response type data)))
       (catch Exception e
-        (stackdriver/log (.getMessage e) :error)))))
+        (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error)))))
 
 (defn log-event [type data]
   (try
@@ -77,7 +77,7 @@
       (reset! last-time-guy-trolled (t/now))
       (wow/troll-guy))
     (catch Exception e
-      (stackdriver/log (.getMessage e) :error))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn -main [& args]
   (db/init-db)
