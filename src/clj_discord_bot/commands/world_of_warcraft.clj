@@ -2,7 +2,8 @@
   (:require [clj-discord-bot.database :as db]
             [clj-discord.core :as discord]
             [clj-discord-bot.common :as common]
-            [clj-http.client :as http-client]))
+            [clj-http.client :as http-client]
+            [clj-discord-bot.stackdriver :as stackdriver]))
 
 (defonce wow-token (.trim (slurp "wow_token.txt")))
 
@@ -40,7 +41,7 @@
             old-rating (get-old-rating (:name character) (:realm character) bracket-name)
             current-rating (:rating bracket)
             rating-diff (- current-rating old-rating)]
-        (println "updating rating for " bracket " to " current-rating)
+        (stackdriver/log (str "updating rating for " bracket " to " current-rating) :error)
         (db/rating-update (:name character) (:realm character) bracket-name current-rating)
         (when (< rating-diff 0)
           (discord/post-message robot-stuff-channel-id

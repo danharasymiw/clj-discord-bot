@@ -9,7 +9,8 @@
                  [cheshire "5.8.0"]
                  [org.clojure/java.jdbc "0.3.5"]
                  [org.fversnel/steam-api "0.8.0"]
-                 [org.xerial/sqlite-jdbc "3.7.2"]]
+                 [org.xerial/sqlite-jdbc "3.7.2"]
+                 [com.google.cloud/google-cloud-logging "1.24.0"]]
   :main clj-discord-bot.core
   :profiles {:uberjar {:aot [clj-discord-bot.core]}}
   :plugins [[lein-cljfmt "0.5.7"]]

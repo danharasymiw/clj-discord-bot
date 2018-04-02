@@ -2,7 +2,6 @@
   (:gen-class)
   (:require [clj-discord.core :as discord]
             [clj-discord-bot.bot-interactions.bot-discussion :as bot-talk]
-            [clj-discord-bot.common :as common]
             [clj-discord-bot.database :as db]
             [clj-discord-bot.commands.evangelize :as evangelize]
             [clj-discord-bot.commands.game_summon :as summon]
@@ -10,7 +9,8 @@
             [clj-discord-bot.commands.roll :as roll]
             [clj-discord-bot.commands.sandbox :as sandbox]
             [clj-discord-bot.commands.world-of-warcraft :as wow]
-            [clj-http.client :as http-client]
+            [clj-discord-bot.commands.version :as version]
+            [clj-discord-bot.stackdriver :as stackdriver]
             [clj-time [core :as t]]))
 
 (def last-time-guy-trolled (atom (t/now)))
@@ -28,7 +28,8 @@
                                                 #'summon/game-add
                                                 #'summon/game-remove
                                                 #'summon/game-list
-                                                #'summon/add-steam-games])))))
+                                                #'summon/add-steam-games
+                                                #'version/version])))))
 
 (defn game-update [type data]
   (let [server-id 0 ;server id is not returned in message data, so ignore for now ... (get-in data ["guild_id"])
@@ -44,7 +45,6 @@
 (defn command-mux [type data]
   (let [message (get data "content")]
     (try
-
       (if (and (.startsWith message "(")
                (.endsWith message ")"))
         (let [command (->> message
@@ -52,6 +52,7 @@
                            (butlast)
                            (apply str))
               command-data (assoc data "content" command)]
+          (stackdriver/log (str "Attempting Command - " message) :error)
           (cond
             (.startsWith command "steamadd") (summon/add-steam-games type command-data)
             (.startsWith command "gamelist") (summon/game-list type command-data)
@@ -60,23 +61,23 @@
             (.equals "help" command) (help type command-data)
             (.equals "d20" command) (roll/d20 type command-data)
             (.startsWith command "summon ") (summon/game-summon type command-data)
-            (.startsWith command "img ") (img-search/find-img type command-data)))
+            (.startsWith command "img ") (img-search/find-img type command-data)
+            (.startsWith command "version") (version/version type command-data)))
         (cond
           (.startsWith message "```clj") (sandbox/run-code type data)
           (.startsWith message "```clojure") (sandbox/run-code type data)
           (.contains message "clojure") (evangelize/get-propaganda type data)
           (re-find #"(?i)rewriting it in Rust\?" message) (bot-talk/rewrite-it-in-rust-response type data)))
       (catch Exception e
-        (println (.getMessage e) e)))))
+        (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error)))))
 
 (defn log-event [type data]
   (try
-    (println "\nReceived: " type " -> " data)
-    (when (< 5 (t/in-seconds (t/interval @last-time-guy-trolled (t/now))))
+    (when (< 5 (t/in-minutes (t/interval @last-time-guy-trolled (t/now))))
       (reset! last-time-guy-trolled (t/now))
       (wow/troll-guy))
     (catch Exception e
-      (println (.getMessage e) e))))
+      (stackdriver/log (clojure.stacktrace/print-stack-trace e) :error))))
 
 (defn -main [& args]
   (db/init-db)
@@ -84,4 +85,5 @@
                     :functions {"MESSAGE_CREATE" [command-mux]
                                 "PRESENCE_UPDATE" [game-update]
                                 "ALL_OTHER" [log-event]}
-                    :rate-limit 1}))
+                    :rate-limit 1
+                    :log-events? false}))
