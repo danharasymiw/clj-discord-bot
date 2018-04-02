@@ -1,7 +1,8 @@
 (ns clj-discord-bot.database
   (:require
-   [byte-streams :as b]
-   [clojure.java.jdbc :as jdbc]))
+    [byte-streams :as b]
+    [clojure.java.jdbc :as jdbc]
+    [clj-discord-bot.stackdriver :as stackdriver]))
 
 (def db
   {:classname   "org.sqlite.JDBC"
@@ -48,18 +49,17 @@
                         :user_id user-id,
                         :game_name game-name})
     (catch Exception e
-      (println (.getMessage e)))))
+      (stackdriver/log (.getMessage e) :error))))
 
 (defn game-deletion [server-id, user-id, game-name]
   (try
     (jdbc/delete! db :games ["user_id = ? AND game_name = ?" user-id game-name])
     (catch Exception e
-      (println (.getMessage e) e))))
+      (stackdriver/log (.getMessage e) :error))))
 
 (defn get-meme-image [meme-text]
   (let [img-blob (jdbc/query db ["SELECT image from memes where meme_text LIKE ?" meme-text])
         fos (java.io.FileOutputStream. "./template.png")]
-    (println img-blob)
     (b/transfer (:image (first img-blob)) fos {:append false})
     (.close fos)))
 
@@ -71,13 +71,13 @@
                             :image (b/to-byte-array fis)})
         (.close fis))
       (catch Exception e
-        (println (.getMessage e) e)))))
+        (stackdriver/log (.getMessage e) :error)))))
 
 (defn meme-deletion [meme-text]
   (try
     (jdbc/delete! db :memes ["meme_text = ?" meme-text])
     (catch Exception e
-      (println (.getMessage e) e))))
+      (stackdriver/log (.getMessage e) :error))))
 
 (defn get-meme-list []
   (jdbc/query db ["SELECT meme_text from MEMES"]))
@@ -95,8 +95,7 @@
                            :bracket bracket
                            :rating rating})
     (catch Exception e
-      (println (.getMessage e) e)
-      (println name bracket rating realm))))
+      (stackdriver/log (.getMessage e) :error))))
 
 (defn rating-update [name realm bracket rating]
   (jdbc/update! db :wow {:rating rating} ["name = ? AND realm = ? AND bracket = ?" name realm bracket]))

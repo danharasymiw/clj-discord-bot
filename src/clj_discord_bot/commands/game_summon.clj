@@ -96,7 +96,6 @@
                                                    :include_appinfo 1} :as :json})
                   :body :response :games)]
     (doseq [game games]
-      (println (:name game))
       (db/game-insertion 0 mention-id (:name game)))
     (discord/post-message (get data "channel_id")
                           (str (common/bongo) "\n"

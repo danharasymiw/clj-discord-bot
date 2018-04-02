@@ -10,6 +10,7 @@
             [clj-discord-bot.commands.sandbox :as sandbox]
             [clj-discord-bot.commands.world-of-warcraft :as wow]
             [clj-discord-bot.commands.version :as version]
+            [clj-discord-bot.stackdriver :as stackdriver]
             [clj-time [core :as t]]))
 
 (def last-time-guy-trolled (atom (t/now)))
@@ -68,16 +69,15 @@
           (.contains message "clojure") (evangelize/get-propaganda type data)
           (re-find #"(?i)rewriting it in Rust\?" message) (bot-talk/rewrite-it-in-rust-response type data)))
       (catch Exception e
-        (println (.getMessage e) e)))))
+        (stackdriver/log (.getMessage e) :error)))))
 
 (defn log-event [type data]
   (try
-    ;;(println "\nReceived: " type " -> " data)
     (when (< 5 (t/in-minutes (t/interval @last-time-guy-trolled (t/now))))
       (reset! last-time-guy-trolled (t/now))
       (wow/troll-guy))
     (catch Exception e
-      (println (.getMessage e) e))))
+      (stackdriver/log (.getMessage e) :error))))
 
 (defn -main [& args]
   (db/init-db)
